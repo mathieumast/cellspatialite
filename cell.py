@@ -2,20 +2,23 @@ import math
 
 class Cell:
     def __init__(self, q, r, s):
-        self.q = round(q) # q position
-        self.r = round(r) # r position
-        self.s = round(s) # size (11: world scale, 3: local scale)
+        self.q = int(round(q)) # q position
+        self.r = int(round(r)) # r position
+        self.level = int(round(s)) # level (11: world scale, 3: local scale)
         
     def __eq__(self, other):
-        return self.q == other.q and self.r == other.r and self.s == other.s
+        return self.q == other.q and self.r == other.r and self.level == other.level
 
     def __hash__(self):
-        return hash(self.q, self.r, self.s)
+        return hash(self.q, self.r, self.level)
+
+    def __str__(self):
+        return "Cell(q=%s, r=%s, level=%s)" % (self.q, self.r, self.level)
 
     def neighbors(self):
         """return neighbors"""
-        return [Cell(self.q + 1, self.r, self.s), Cell(self.q + 1, self.r-1, self.s), Cell(self.q, self.r - 1, self.s),
-        Cell(self.q - 1, self.r, self.s), Cell(self.q - 1, self.r + 1, self.s), Cell(self.q, self.r + 1, self.s)]
+        return [Cell(self.q + 1, self.r, self.level), Cell(self.q + 1, self.r-1, self.level), Cell(self.q, self.r - 1, self.level),
+        Cell(self.q - 1, self.r, self.level), Cell(self.q - 1, self.r + 1, self.level), Cell(self.q, self.r + 1, self.level)]
 
     def corners(self):
         """return corners in 3857"""
@@ -23,30 +26,31 @@ class Cell:
         res = []
         for i in range(0, 6):
             rad = (30.0 + 60.0 * i) * math.pi / 180.0
-            res.append(Pos(self.s * math.cos(rad) + center.x, self.s * math.sin(rad) + center.y))
+            s = 15 * math.pow(3, self.level)
+            res.append(Pos(math.cos(rad) * s + center.x, math.sin(rad) * s + center.y))
         return res
 
     def center(self):
         """return center in 3857"""
-        x = float(self.s) * math.sqrt(3.0) * (float(self.q) + (float(self.r) / 2.0))
-        y = float(self.s) * float(self.r) * 3.0 / 2.0
+        s = 15 * math.pow(3, self.level)
+        x = math.sqrt(3.0) *s * (self.q + (0.5 * self.r))
+        y = 1.5 * s * self.r
         return Pos(x, y)
     
     def wkt(self):
         """return wkt in 3857"""
-        strs = ["POLYGON(("]
+        strs = []
         corners = self.corners()
         for corner in corners:
-            if len(strs) != 0:
-                strs.append(", ")
-            else:
+            if len(strs) == 0:
                 strs.append("POLYGON((")
-            strs.append(corner.x)
+            strs.append(str(corner.x))
             strs.append(" ")
-            strs.append(corner.y)
-        strs.append(corners[0].x)
+            strs.append(str(corner.y))
+            strs.append(", ")
+        strs.append(str(corners[0].x))
         strs.append(" ")
-        strs.append(corners[0].y)
+        strs.append(str(corners[0].y))
         strs.append("))")
         return ''.join(strs)
 
@@ -61,10 +65,14 @@ class Pos:
     def __hash__(self):
         return hash(self.x, self.y)
 
-    def cell(self, s):
+    def __str__(self):
+        return "Pos(x=%s, y=%s)" % (self.x, self.y)
+
+    def cell(self, level):
         """return cell"""
-        q = (float(self.x) * math.sqrt(3.0) / 3.0 - (float(self.y) / 3.0)) / s
-        r = (float(self.y) * 2.0 / 3.0) / s
+        s = 15 * math.pow(3, level)
+        q = ((self.x * math.sqrt(3.0) / 3.0) - (self.y / 3.0)) / s
+        r = (self.y * 2.0 / 3.0) / s
         tx = q
         ty = -q - r
         tz = r
@@ -80,4 +88,4 @@ class Pos:
             rty = -rtx - rtz
         else:
             rtz = -rtx - rty
-        return Cell(rtx, rtz, s)
+        return Cell(rtx, rtz, level)
