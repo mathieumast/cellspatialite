@@ -13,15 +13,15 @@ class Cell:
         return hash(self.q, self.r, self.level)
 
     def __str__(self):
-        return "Cell(q=%s, r=%s, level=%s)" % (self.q, self.r, self.level)
+        return 'Cell(q=%s, r=%s, level=%s)' % (self.q, self.r, self.level)
 
     def neighbors(self):
-        """return neighbors"""
+        '''return neighbors'''
         return [Cell(self.q + 1, self.r, self.level), Cell(self.q + 1, self.r-1, self.level), Cell(self.q, self.r - 1, self.level),
         Cell(self.q - 1, self.r, self.level), Cell(self.q - 1, self.r + 1, self.level), Cell(self.q, self.r + 1, self.level)]
 
     def corners(self):
-        """return corners in 3857"""
+        '''return corners in 3857'''
         center = self.center()
         res = []
         for i in range(0, 6):
@@ -31,27 +31,27 @@ class Cell:
         return res
 
     def center(self):
-        """return center in 3857"""
+        '''return center in 3857'''
         s = 15 * math.pow(3, self.level)
         x = math.sqrt(3.0) *s * (self.q + (0.5 * self.r))
         y = 1.5 * s * self.r
         return Pos(x, y)
     
     def wkt(self):
-        """return wkt in 3857"""
+        '''return wkt in 3857'''
         strs = []
         corners = self.corners()
         for corner in corners:
             if len(strs) == 0:
-                strs.append("POLYGON((")
-            strs.append(str(corner.x))
-            strs.append(" ")
-            strs.append(str(corner.y))
-            strs.append(", ")
-        strs.append(str(corners[0].x))
-        strs.append(" ")
-        strs.append(str(corners[0].y))
-        strs.append("))")
+                strs.append('POLYGON((')
+            strs.append(str(round(corner.x, 7)))
+            strs.append(' ')
+            strs.append(str(round(corner.y, 7)))
+            strs.append(', ')
+        strs.append(str(round(corners[0].x, 7)))
+        strs.append(' ')
+        strs.append(str(round(corners[0].y, 7)))
+        strs.append('))')
         return ''.join(strs)
 
 class Pos:
@@ -66,10 +66,10 @@ class Pos:
         return hash(self.x, self.y)
 
     def __str__(self):
-        return "Pos(x=%s, y=%s)" % (self.x, self.y)
+        return 'Pos(x=%s, y=%s)' % (self.x, self.y)
 
     def cell(self, level):
-        """return cell"""
+        '''return cell'''
         s = 15 * math.pow(3, level)
         q = ((self.x * math.sqrt(3.0) / 3.0) - (self.y / 3.0)) / s
         r = (self.y * 2.0 / 3.0) / s
