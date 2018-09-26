@@ -1,5 +1,5 @@
 import unittest
-import cluster
+from .. import cluster
 import math
 
 class CellTest(unittest.TestCase):

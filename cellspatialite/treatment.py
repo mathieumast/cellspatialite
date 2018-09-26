@@ -3,8 +3,9 @@ import database
 import pandas as pd
 
 class Treatment:
-    def __init__(self, name):
-        self.db = database.Database(name)
+    def __init__(self, input, output):
+        self.input = input
+        self.db = database.Database(output)
 
     def start(self):
         self.db.remove_file()
@@ -14,7 +15,7 @@ class Treatment:
         self.db.disconnect()
 
     def import_all(self):
-        df =pd.read_csv('data.csv', names = ['date','x','y','z','val'], sep=',', header=0)
+        df =pd.read_csv(self.input, names = ['date','x','y','z','val'], sep=',', header=0)
         print(df.head(1))
         for row in df.itertuples():
             self.import_row(row)
