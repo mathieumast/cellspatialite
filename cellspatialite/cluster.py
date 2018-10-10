@@ -1,11 +1,12 @@
 import math
 
+
 class Cell:
     def __init__(self, q, r, s):
-        self.q = int(round(q)) # q position
-        self.r = int(round(r)) # r position
-        self.level = int(round(s)) # level (11: world scale, 3: local scale)
-        
+        self.q = int(round(q))  # q position
+        self.r = int(round(r))  # r position
+        self.level = int(round(s))  # level (11: world scale, 3: local scale)
+
     def __eq__(self, other):
         return self.q == other.q and self.r == other.r and self.level == other.level
 
@@ -18,7 +19,7 @@ class Cell:
     def neighbors(self):
         '''return neighbors'''
         return [Cell(self.q + 1, self.r, self.level), Cell(self.q + 1, self.r-1, self.level), Cell(self.q, self.r - 1, self.level),
-        Cell(self.q - 1, self.r, self.level), Cell(self.q - 1, self.r + 1, self.level), Cell(self.q, self.r + 1, self.level)]
+                Cell(self.q - 1, self.r, self.level), Cell(self.q - 1, self.r + 1, self.level), Cell(self.q, self.r + 1, self.level)]
 
     def corners(self):
         '''return corners in 3857'''
@@ -26,17 +27,18 @@ class Cell:
         res = []
         for i in range(0, 6):
             rad = (30.0 + 60.0 * i) * math.pi / 180.0
-            s = 15 * math.pow(3, self.level)
-            res.append(Pos(math.cos(rad) * s + center.x, math.sin(rad) * s + center.y))
+            s = compute_s(self.level)
+            res.append(Pos(math.cos(rad) * s + center.x,
+                           math.sin(rad) * s + center.y))
         return res
 
     def center(self):
         '''return center in 3857'''
-        s = 15 * math.pow(3, self.level)
-        x = math.sqrt(3.0) *s * (self.q + (0.5 * self.r))
+        s = compute_s(self.level)
+        x = math.sqrt(3.0) * s * (self.q + (0.5 * self.r))
         y = 1.5 * s * self.r
         return Pos(x, y)
-    
+
     def wkt(self):
         '''return wkt in 3857'''
         strs = []
@@ -54,11 +56,12 @@ class Cell:
         strs.append('))')
         return ''.join(strs)
 
+
 class Pos:
     def __init__(self, x, y):
-        self.x = float(x) # x in 3857
-        self.y = float(y) # y in 3857
-        
+        self.x = float(x)  # x in 3857
+        self.y = float(y)  # y in 3857
+
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y
 
@@ -70,7 +73,7 @@ class Pos:
 
     def cell(self, level):
         '''return cell'''
-        s = 15 * math.pow(3, level)
+        s = compute_s(level)
         q = ((self.x * math.sqrt(3.0) / 3.0) - (self.y / 3.0)) / s
         r = (self.y * 2.0 / 3.0) / s
         tx = q
@@ -89,3 +92,6 @@ class Pos:
         else:
             rtz = -rtx - rty
         return Cell(rtx, rtz, level)
+
+def compute_s(level):
+    return 15 * math.pow(3, level - 3)

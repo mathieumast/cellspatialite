@@ -22,5 +22,5 @@ class Treatment:
 
     def import_row(self, row):
         self.db.insert_into_data(row)
-        for level in range(1, 12):
+        for level in range(1, 9):
             self.db.upsert_into_cell_level(level, row)

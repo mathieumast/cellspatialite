@@ -55,7 +55,7 @@ class Database:
         c.execute('''CREATE TABLE data
             (date TEXT, val REAL)''')
         c.execute('''SELECT AddGeometryColumn('data', 'geometry', 3857, 'POINT', 'XYZ', 1)''')
-        for level in range(1, 12):
+        for level in range(1, 9):
             # Table cellx
             c.execute('''CREATE TABLE cell%s
                 (id TEXT NOT NULL PRIMARY KEY, count INTEGER, sum REAL, average REAL)''' % (level))
